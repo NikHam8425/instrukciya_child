@@ -1,5 +1,4 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 
 enum Gender { male, female }
@@ -8,16 +7,12 @@ class ChildProfile {
   final String name;
   final Gender gender;
   final DateTime birthDate;
-  /// Вес в кг
-  final double weight;
-  /// Рост в см
-  final double height;
+  final double weight; // в кг
+  final double height; // в см
   final List<String> specialNeeds;
   final List<String> allergies;
   final String notes;
   final DateTime createdAt;
-
-  static const _prefsKey = 'childProfile'; // общий префикс-ключ для безопасного хранения
 
   const ChildProfile({
     required this.name,
@@ -31,34 +26,10 @@ class ChildProfile {
     required this.createdAt,
   });
 
-  ChildProfile copyWith({
-    String? name,
-    Gender? gender,
-    DateTime? birthDate,
-    double? weight,
-    double? height,
-    List<String>? specialNeeds,
-    List<String>? allergies,
-    String? notes,
-    DateTime? createdAt,
-  }) {
-    return ChildProfile(
-      name: name ?? this.name,
-      gender: gender ?? this.gender,
-      birthDate: birthDate ?? this.birthDate,
-      weight: weight ?? this.weight,
-      height: height ?? this.height,
-      specialNeeds: specialNeeds ?? this.specialNeeds,
-      allergies: allergies ?? this.allergies,
-      notes: notes ?? this.notes,
-      createdAt: createdAt ?? this.createdAt,
-    );
-    }
-
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'gender': gender.name, // male/female
+      'gender': gender.name,
       'birthDate': birthDate.toIso8601String(),
       'weight': weight,
       'height': height,
@@ -70,170 +41,108 @@ class ChildProfile {
   }
 
   factory ChildProfile.fromJson(Map<String, dynamic> json) {
-    // Безопасный парсинг
-    final rawGender = (json['gender'] as String?) ?? 'male';
-    final parsedGender = Gender.values.firstWhere(
-      (g) => g.name == rawGender,
-      orElse: () => Gender.male,
-    );
-
-    DateTime _safeParseDate(String? s, {DateTime? fallback}) {
-      final d = s == null ? null : DateTime.tryParse(s);
-      return d ?? (fallback ?? DateTime.now());
-    }
-
-    double _toDouble(dynamic v, {double fallback = 0}) {
-      if (v is num) return v.toDouble();
-      if (v is String) return double.tryParse(v) ?? fallback;
-      return fallback;
-    }
-
-    List<String> _stringList(dynamic v) {
-      if (v is List) {
-        return v.whereType<String>().toList();
-      }
-      return const [];
-    }
-
     return ChildProfile(
-      name: (json['name'] as String?)?.trim() ?? '',
-      gender: parsedGender,
-      birthDate: _safeParseDate(json['birthDate'] as String?),
-      weight: _toDouble(json['weight'], fallback: 0),
-      height: _toDouble(json['height'], fallback: 0),
-      specialNeeds: _stringList(json['specialNeeds']),
-      allergies: _stringList(json['allergies']),
-      notes: (json['notes'] as String?) ?? '',
-      createdAt: _safeParseDate(json['createdAt'] as String?, fallback: DateTime.now()),
+      name: json['name'] as String,
+      gender: Gender.values.firstWhere((g) => g.name == json['gender']),
+      birthDate: DateTime.parse(json['birthDate'] as String),
+      weight: (json['weight'] as num).toDouble(),
+      height: (json['height'] as num).toDouble(),
+      specialNeeds: List<String>.from(json['specialNeeds'] ?? []),
+      allergies: List<String>.from(json['allergies'] ?? []),
+      notes: json['notes'] as String? ?? '',
+      createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
 
-  /// Возраст в месяцах по календарю (точнее, чем делить на 30.44)
+  // Вычисляем возраст в месяцах
   int get ageInMonths {
     final now = DateTime.now();
-    int months = (now.year - birthDate.year) * 12 + (now.month - birthDate.month);
-    if (now.day < birthDate.day) months -= 1;
-    return months.clamp(0, 1200); // защита от отрицательных/чрезмерных значений
+    final difference = now.difference(birthDate);
+    return (difference.inDays / 30.44).floor();
   }
 
-  /// Возраст в годах (целые)
-  int get ageInYears => (ageInMonths / 12).floor();
+  // Вычисляем возраст в годах
+  int get ageInYears {
+    return (ageInMonths / 12).floor();
+  }
 
-  /// ИМТ с защитой от деления на ноль
+  // Вычисляем ИМТ
   double get bmi {
-    final h = height / 100.0;
-    if (h <= 0) return 0;
-    final value = weight / (h * h);
-    if (value.isNaN || value.isInfinite) return 0;
-    return double.parse(value.toStringAsFixed(2));
+    final heightInMeters = height / 100;
+    return weight / (heightInMeters * heightInMeters);
   }
 
-  /// Рекомендации (уникальные и по делу)
+  // Получаем рекомендации на основе данных
   List<String> get recommendations {
-    final set = <String>{};
-
-    // По возрасту
+    final recommendations = <String>[];
+    
+    // Рекомендации по возрасту
     if (ageInMonths < 6) {
-      set.add('Исключительно грудное вскармливание или смесь');
-      set.add('Регулярные осмотры педиатра');
+      recommendations.add('Исключительно грудное вскармливание или смесь');
+      recommendations.add('Регулярные осмотры педиатра');
     } else if (ageInMonths < 12) {
-      set.add('Введение прикорма с 6 месяцев');
-      set.add('Развитие мелкой моторики');
+      recommendations.add('Введение прикорма с 6 месяцев');
+      recommendations.add('Развитие мелкой моторики');
     } else if (ageInYears < 3) {
-      set.add('Активное развитие речи');
-      set.add('Приучение к горшку');
+      recommendations.add('Активное развитие речи');
+      recommendations.add('Приучение к горшку');
     } else if (ageInYears < 6) {
-      set.add('Подготовка к детскому саду');
-      set.add('Развитие социальных навыков');
+      recommendations.add('Подготовка к детскому саду');
+      recommendations.add('Развитие социальных навыков');
     } else {
-      set.add('Подготовка к школе');
-      set.add('Развитие самостоятельности');
+      recommendations.add('Подготовка к школе');
+      recommendations.add('Развитие самостоятельности');
     }
 
-    // По ИМТ (очень условно; при сомнениях — к врачу)
-    if (bmi > 0 && bmi < 14) {
-      set.add('Проконсультируйтесь с педиатром по вопросу массы тела');
+    // Рекомендации по ИМТ
+    if (bmi < 14) {
+      recommendations.add('Консультация с педиатром по весу');
     } else if (bmi > 20) {
-      set.add('Сбалансированное питание и регулярная физическая активность');
+      recommendations.add('Контроль питания и физической активности');
     }
 
+    // Рекомендации по особым потребностям
     if (specialNeeds.isNotEmpty) {
-      set.add('Индивидуальный план развития совместно со специалистами');
-    }
-    if (allergies.isNotEmpty) {
-      set.add('Контролируйте рацион и держите антигистаминные по рекомендации врача');
+      recommendations.add('Индивидуальный подход к развитию');
+      recommendations.add('Консультации со специалистами');
     }
 
-    return set.toList(growable: false);
+    // Рекомендации по аллергиям
+    if (allergies.isNotEmpty) {
+      recommendations.add('Внимательно следите за рационом');
+      recommendations.add('Имейте при себе антигистаминные препараты');
+    }
+
+    return recommendations;
   }
 
-  // --- Persistence ---
-
+  // Сохранение в SharedPreferences
   Future<void> save() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefsKey, jsonEncode(toJson()));
+    await prefs.setString('childProfile', jsonEncode(toJson()));
   }
 
+  // Загрузка из SharedPreferences
   static Future<ChildProfile?> load() async {
     final prefs = await SharedPreferences.getInstance();
-    final s = prefs.getString(_prefsKey);
-    if (s == null) return null;
-    try {
-      final jsonMap = jsonDecode(s) as Map<String, dynamic>;
-      return ChildProfile.fromJson(jsonMap);
-    } catch (_) {
-      return null;
+    final profileString = prefs.getString('childProfile');
+    
+    if (profileString != null) {
+      try {
+        final profileJson = jsonDecode(profileString) as Map<String, dynamic>;
+        return ChildProfile.fromJson(profileJson);
+      } catch (e) {
+        return null;
+      }
     }
+    
+    return null;
   }
 
+  // Проверка, есть ли сохранённый профиль
   static Future<bool> hasProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey(_prefsKey);
-  }
-
-  // Удобно для тестов/сброса
-  static Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_prefsKey);
-  }
-
-  // Сравнение и хэш (удобно для Provider/Bloc)
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is ChildProfile &&
-        other.name == name &&
-        other.gender == gender &&
-        other.birthDate == birthDate &&
-        other.weight == weight &&
-        other.height == height &&
-        _listEquals(other.specialNeeds, specialNeeds) &&
-        _listEquals(other.allergies, allergies) &&
-        other.notes == notes &&
-        other.createdAt == createdAt;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      name,
-      gender,
-      birthDate,
-      weight,
-      height,
-      Object.hashAll(specialNeeds),
-      Object.hashAll(allergies),
-      notes,
-      createdAt,
-    );
-  }
-
-  static bool _listEquals(List<String> a, List<String> b) {
-    if (identical(a, b)) return true;
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
+    return prefs.containsKey('childProfile');
   }
 }
+

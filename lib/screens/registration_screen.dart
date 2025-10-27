@@ -1,9 +1,6 @@
-import '../../models/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/child_profile.dart';
-import 'package:provider/provider.dart';
-import '../state/profile_state.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -122,16 +119,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         createdAt: DateTime.now(),
       );
 
-      await context.read<ProfileState>().updateChild(profile);
-
-      await context.read<ProfileState>().updateUser(
-        UserProfile(
-          name: 'Имя родителя',
-          email: 'почта',
-          phone: '+7 900 000-00-00',
-          avatarPath: null,
-        ),
-      );
+      await profile.save();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

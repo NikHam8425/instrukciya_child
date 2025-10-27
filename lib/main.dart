@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'state/profile_state.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/main_shell.dart';
@@ -9,12 +7,7 @@ import 'models/child_profile.dart';
 import 'theme/app_theme.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ProfileState()..load(),
-      child: const InstrukciyaChildApp(),
-    ),
-  );
+  runApp(const InstrukciyaChildApp());
 }
 
 class InstrukciyaChildApp extends StatelessWidget {
