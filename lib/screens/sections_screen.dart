@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+cat > lib/screens/sections_screen.dart << 'EOF'
+import 'package:flutter/material.dart';
+import 'package:instrukciya_child/screens/ages/pregnancy_screen.dart';
+import 'package:instrukciya_child/screens/ages/age_0_1_screen.dart';
+import 'package:instrukciya_child/screens/ages/age_1_3_screen.dart';
+import 'package:instrukciya_child/screens/ages/age_3_5_screen.dart';
+import 'package:instrukciya_child/screens/ages/age_6_8_screen.dart';
+
 class SectionsScreen extends StatelessWidget {
   const SectionsScreen({super.key});
 
@@ -13,6 +21,7 @@ class SectionsScreen extends StatelessWidget {
       ('age_3_5', '3–5 лет', '🎒'),
       ('age_6_8', '6–8 лет', '🧠'),
     ];
+
     return Scaffold(
       appBar: AppBar(title: const Text('Развитие')),
       body: ListView.separated(
@@ -26,7 +35,31 @@ class SectionsScreen extends StatelessWidget {
             title: Text(it.$2, style: const TextStyle(fontWeight: FontWeight.w700)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: navigate to topics list for period it.$1
+              Widget screen;
+              switch (it.$1) {
+                case 'prenatal':
+                  screen = const PregnancyScreen();
+                  break;
+                case 'age_0_1':
+                  screen = const Age0to1Screen();
+                  break;
+                case 'age_1_3':
+                  screen = const Age1to3Screen();
+                  break;
+                case 'age_3_5':
+                  screen = const Age3to5Screen();
+                  break;
+                case 'age_6_8':
+                  screen = const Age6to8Screen();
+                  break;
+                default:
+                  return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => screen),
+              );
             },
           );
         },
@@ -36,5 +69,5 @@ class SectionsScreen extends StatelessWidget {
     );
   }
 }
-
+EOF
 

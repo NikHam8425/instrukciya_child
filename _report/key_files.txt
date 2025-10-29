@@ -1,0 +1,141 @@
+===== lib/main.dart =====
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'screens/main_shell.dart';
+import 'screens/registration_screen.dart';
+import 'models/child_profile.dart';
+import 'theme/app_theme.dart';
+
+void main() {
+  runApp(const InstrukciyaChildApp());
+}
+
+class InstrukciyaChildApp extends StatelessWidget {
+  const InstrukciyaChildApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Инструкция к ребёнку',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ru', 'RU'),
+        Locale('en', 'US'),
+      ],
+      home: const AppInitializer(),
+      routes: {
+        '/main': (context) => const MainShell(),
+        '/registration': (context) => const RegistrationScreen(),
+      },
+    );
+  }
+}
+
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  bool _isLoading = true;
+  bool _hasProfile = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkProfile();
+  }
+
+  Future<void> _checkProfile() async {
+    // Временно очищаем профиль для тестирования
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('childProfile');
+    
+    final hasProfile = await ChildProfile.hasProfile();
+    
+    setState(() {
+      _hasProfile = hasProfile;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_hasProfile) {
+      return const MainShell();
+    } else {
+      return const RegistrationScreen();
+    }
+  }
+}
+
+===== lib/screens/main_shell.dart =====
+import 'package:flutter/material.dart';
+
+import 'sections_screen.dart';
+import 'assistant_screen.dart';
+import 'profile_screen.dart';
+import 'new/family_feed_screen.dart';
+import 'new/baby_calendar_screen.dart';
+import 'new/progress_screen.dart';
+
+class MainShell extends StatefulWidget {
+  const MainShell({super.key});
+
+  @override
+  State<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<MainShell> {
+  int _index = 0;
+
+  final _screens = const [
+    SectionsScreen(),
+    AssistantScreen(),
+    ProfileScreen(),
+    FamilyFeedScreen(),
+    BabyCalendarScreen(),
+    ProgressScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_index],
+      bottomNavigationBar: NavigationBar(
+        // Показываем подпись только у выбранной вкладки, чтобы не было переносов
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        selectedIndex: _index,
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Главная'),
+          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: 'Ассистент'),
+          NavigationDestination(icon: Icon(Icons.favorite_outline), selectedIcon: Icon(Icons.favorite), label: 'Профиль'),
+          NavigationDestination(icon: Icon(Icons.feed_outlined), selectedIcon: Icon(Icons.feed), label: 'Лента'),
+          NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Календарь'),
+          NavigationDestination(icon: Icon(Icons.checklist_outlined), selectedIcon: Icon(Icons.checklist), label: 'Прогресс'),
+        ],
+        onDestinationSelected: (i) => setState(() => _index = i),
+      ),
+    );
+  }
+}
+
+
+
