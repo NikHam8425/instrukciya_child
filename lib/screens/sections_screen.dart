@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-
-cat > lib/screens/sections_screen.dart << 'EOF'
-import 'package:flutter/material.dart';
 import 'package:instrukciya_child/screens/ages/pregnancy_screen.dart';
 import 'package:instrukciya_child/screens/ages/age_0_1_screen.dart';
 import 'package:instrukciya_child/screens/ages/age_1_3_screen.dart';
@@ -69,5 +66,3 @@ class SectionsScreen extends StatelessWidget {
     );
   }
 }
-EOF
-
