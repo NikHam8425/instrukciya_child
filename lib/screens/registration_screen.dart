@@ -6,7 +6,9 @@ import 'sections_screen.dart';
 import 'main_shell.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+  final ChildProfile? existingChild;
+  final UserProfile? existingParent;
+  const RegistrationScreen({super.key, this.existingChild, this.existingParent});
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();

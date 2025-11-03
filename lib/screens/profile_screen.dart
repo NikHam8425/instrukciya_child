@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/child_profile.dart';
 import '../models/user_profile.dart';
+import 'registration_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -32,41 +33,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           final profile = snapshot.data;
+
+          if (profile == null) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Профиль не заполнен'),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final child = await _future;
+                      final parent = await _futureParent;
+                      if (!context.mounted) return;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => RegistrationScreen(
+                            existingChild: child,
+                            existingParent: parent,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('Создать профиль'),
+                  ),
+                ],
+              ),
+            );
+          }
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (profile == null) ...[
-                const Text('Профиль не заполнен'),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/registration'),
-                  child: const Text('Создать профиль'),
-                ),
-              ] else ...[
-                _tile('Имя', profile.name, Icons.person),
-                _tile(
-                  'Пол',
-                  profile.gender == Gender.male ? 'Мальчик' : 'Девочка',
-                  Icons.wc,
-                ),
-                _tile(
-                  'Дата рождения',
-                  '${profile.birthDate.day.toString().padLeft(2, '0')}.${profile.birthDate.month.toString().padLeft(2, '0')}.${profile.birthDate.year}',
-                  Icons.cake,
-                ),
-                _tile('Вес', '${profile.weight.toStringAsFixed(1)} кг', Icons.monitor_weight),
-                _tile('Рост', '${profile.height.toStringAsFixed(0)} см', Icons.height),
-                if (profile.notes.isNotEmpty) _tile('Заметки', profile.notes, Icons.note),
-                const SizedBox(height: 16),
-                if (profile.specialNeeds.isNotEmpty)
-                  _chips('Особые потребности', profile.specialNeeds),
-                if (profile.allergies.isNotEmpty)
-                  _chips('Аллергии', profile.allergies),
-              ],
+              _tile('Имя', profile.name, Icons.person),
+              _tile('Пол',
+                  profile.gender == Gender.male ? 'Мальчик' : 'Девочка', Icons.wc),
+              _tile(
+                'Дата рождения',
+                '${profile.birthDate.day.toString().padLeft(2, '0')}.${profile.birthDate.month.toString().padLeft(2, '0')}.${profile.birthDate.year}',
+                Icons.cake,
+              ),
+              _tile('Вес', '${profile.weight.toStringAsFixed(1)} кг', Icons.monitor_weight),
+              _tile('Рост', '${profile.height.toStringAsFixed(0)} см', Icons.height),
+              if (profile.notes.isNotEmpty)
+                _tile('Заметки', profile.notes, Icons.note),
+              const SizedBox(height: 16),
+              if (profile.specialNeeds.isNotEmpty)
+                _chips('Особые потребности', profile.specialNeeds),
+              if (profile.allergies.isNotEmpty)
+                _chips('Аллергии', profile.allergies),
 
               const SizedBox(height: 24),
-
-              // ===== Блок родителя =====
               FutureBuilder<UserProfile?>(
                 future: _futureParent,
                 builder: (context, parentSnapshot) {
@@ -77,7 +95,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       const Text(
                         'Данные родителя',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Card(
@@ -103,12 +122,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             subtitle: Text(parent.phone!),
                           ),
                         ),
-                      const SizedBox(height: 24),
                     ],
                   );
                 },
               ),
-
+              const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => Navigator.pushNamed(context, '/registration'),
                 child: const Text('Редактировать'),
@@ -137,12 +155,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(title,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: values.map((e) => Chip(label: Text(e))).toList(),
+              children:
+                  values.map((e) => Chip(label: Text(e))).toList(),
             ),
           ],
         ),
