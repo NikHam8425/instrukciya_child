@@ -11,6 +11,18 @@ import 'package:instrukciya_child/screens/ages/age_9_10_screen.dart';
 import 'package:instrukciya_child/screens/ages/age_11_13_screen.dart';
 import 'package:instrukciya_child/screens/ages/age_14_17_screen.dart';
 
+// Helper function для получения информации о подписке
+Future<Map<String, dynamic>> _getSubscriptionInfo() async {
+  final paymentService = PaymentService();
+  final isPremium = await paymentService.isPremium();
+  final remaining = await paymentService.getRemainingFreeActions();
+  
+  return {
+    'isPremium': isPremium,
+    'remaining': remaining,
+  };
+}
+
 class SectionsScreen extends StatelessWidget {
   const SectionsScreen({super.key});
 

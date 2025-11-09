@@ -115,18 +115,6 @@ class _AppInitializerState extends State<AppInitializer> {
   }
 
   Future<void> _checkProfile() async {
-    try {
-      // Проверяем аутентификацию Firebase
-      final user = FirebaseAuth.instance.currentUser;
-      
-      if (user != null) {
-        // Пользователь авторизован - сохраняем/обновляем FCM токен
-        await _saveFCMToken(user.uid);
-      }
-    } catch (e) {
-      print('Firebase не настроен, работаем локально: $e');
-    }
-    
     // Проверяем наличие профиля ребенка (локально)
     final hasProfile = await ChildProfile.hasProfile();
     
@@ -134,20 +122,6 @@ class _AppInitializerState extends State<AppInitializer> {
       _hasProfile = hasProfile;
       _isLoading = false;
     });
-  }
-  
-  Future<void> _saveFCMToken(String userId) async {
-    try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .set({'fcmToken': token}, SetOptions(merge: true));
-      }
-    } catch (e) {
-      print('Error saving FCM token: $e');
-    }
   }
 
   @override
