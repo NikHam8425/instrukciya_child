@@ -9,8 +9,90 @@ class PregnancyScreen extends StatefulWidget {
 
 class _PregnancyScreenState extends State<PregnancyScreen> {
   int _currentWeek = 1;
-  final List<bool> _checklist = [false, false, false, false];
+  final Map<int, List<bool>> _checklistStates = {};
   final TextEditingController _notesController = TextEditingController();
+
+  List<bool> _getChecklistForWeek(int week) {
+    if (!_checklistStates.containsKey(week)) {
+      final tasks = _getTasksForWeek(week);
+      _checklistStates[week] = List.filled(tasks.length, false);
+    }
+    return _checklistStates[week]!;
+  }
+
+  List<String> _getTasksForWeek(int week) {
+    if (week <= 4) {
+      return [
+        'Сделать тест на беременность',
+        'Записаться к гинекологу',
+        'Начать принимать фолиевую кислоту',
+        'Отказаться от алкоголя и курения',
+      ];
+    } else if (week <= 8) {
+      return [
+        'Встать на учёт в женской консультации',
+        'Сдать первые анализы (кровь, моча)',
+        'Пройти УЗИ для подтверждения беременности',
+        'Начать вести дневник беременности',
+      ];
+    } else if (week <= 12) {
+      return [
+        'Пройти первый скрининг (11-13 недель)',
+        'Сдать анализы на инфекции',
+        'Получить справку о постановке на учёт',
+        'Подобрать витамины для беременных',
+      ];
+    } else if (week <= 16) {
+      return [
+        'Следить за весом и питанием',
+        'Начать носить удобную одежду',
+        'Записаться на курсы для беременных',
+        'Сделать фото животика',
+      ];
+    } else if (week <= 20) {
+      return [
+        'Пройти второй скрининг (18-20 недель)',
+        'Узнать пол ребёнка (по желанию)',
+        'Почувствовать первые шевеления',
+        'Начать общаться с малышом',
+      ];
+    } else if (week <= 24) {
+      return [
+        'Пройти тест на глюкозу',
+        'Следить за артериальным давлением',
+        'Подобрать бандаж для живота',
+        'Начать выбирать имя для малыша',
+      ];
+    } else if (week <= 28) {
+      return [
+        'Пройти третий скрининг',
+        'Оформить декретный отпуск',
+        'Начать собирать приданое для малыша',
+        'Выбрать роддом',
+      ];
+    } else if (week <= 32) {
+      return [
+        'Посещать врача каждые 2 недели',
+        'Пройти КТГ (кардиотокографию)',
+        'Подготовить детскую комнату',
+        'Купить автокресло для новорождённого',
+      ];
+    } else if (week <= 36) {
+      return [
+        'Собрать сумку в роддом',
+        'Подготовить документы',
+        'Выбрать врача для родов',
+        'Составить план родов',
+      ];
+    } else {
+      return [
+        'Быть готовой к родам в любой момент',
+        'Держать телефон заряженным',
+        'Знать маршрут до роддома',
+        'Отдыхать и набираться сил',
+      ];
+    }
+  }
 
   final Map<int, String> _weekDescriptions = {
     1: 'Начало пути! Возможно, вы ещё не знаете о беременности. Следите за самочувствием.',
@@ -111,21 +193,19 @@ class _PregnancyScreenState extends State<PregnancyScreen> {
           // --- Чек-лист подготовки ---
           Text('Что важно сделать', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
-          ...List.generate(_checklist.length, (i) {
-            final tasks = [
-              'Пройти УЗИ и анализы',
-              'Выбрать роддом и врача',
-              'Собрать сумку в роддом',
-              'Составить план родов',
-            ];
-            return CheckboxListTile(
-              value: _checklist[i],
-              onChanged: (val) => setState(() => _checklist[i] = val ?? false),
-              title: Text(tasks[i]),
-              controlAffinity: ListTileControlAffinity.leading,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            );
-          }),
+          ...() {
+            final checklist = _getChecklistForWeek(_currentWeek);
+            final tasks = _getTasksForWeek(_currentWeek);
+            return List.generate(tasks.length, (i) {
+              return CheckboxListTile(
+                value: checklist[i],
+                onChanged: (val) => setState(() => checklist[i] = val ?? false),
+                title: Text(tasks[i]),
+                controlAffinity: ListTileControlAffinity.leading,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              );
+            });
+          }(),
 
           const SizedBox(height: 16),
 

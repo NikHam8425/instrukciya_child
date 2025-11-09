@@ -9,8 +9,133 @@ class Age0to1Screen extends StatefulWidget {
 
 class _Age0to1ScreenState extends State<Age0to1Screen> {
   int _currentMonth = 0;
-  final List<bool> _checklist = [false, false, false, false, false];
+  final Map<int, List<bool>> _checklistStates = {};
   final TextEditingController _notesController = TextEditingController();
+
+  List<bool> _getChecklistForMonth(int month) {
+    if (!_checklistStates.containsKey(month)) {
+      final tasks = _getTasksForMonth(month);
+      _checklistStates[month] = List.filled(tasks.length, false);
+    }
+    return _checklistStates[month]!;
+  }
+
+  List<String> _getTasksForMonth(int month) {
+    switch (month) {
+      case 0:
+        return [
+          'Кормление по требованию',
+          'Контакт кожа к коже',
+          'Обработка пупочной ранки',
+          'Первый осмотр у педиатра',
+          'Наладить режим сна',
+        ];
+      case 1:
+        return [
+          'Ежедневное купание',
+          'Лёгкий массаж и гимнастика',
+          'Выкладывание на животик',
+          'Прогулки на свежем воздухе',
+          'Плановый осмотр в 1 месяц',
+        ];
+      case 2:
+        return [
+          'Показывать яркие игрушки',
+          'Разговаривать с малышом',
+          'Укреплять мышцы шеи',
+          'Первая прививка (по графику)',
+          'Следить за режимом сна',
+        ];
+      case 3:
+        return [
+          'Игры с погремушками',
+          'Упражнения на фитболе',
+          'Развитие хватательного рефлекса',
+          'Осмотр у педиатра в 3 месяца',
+          'Вторая прививка',
+        ];
+      case 4:
+        return [
+          'Учить переворачиваться',
+          'Развивать мелкую моторику',
+          'Читать книжки с картинками',
+          'Петь песенки и потешки',
+          'Плановый осмотр',
+        ];
+      case 5:
+        return [
+          'Поддерживать попытки сесть',
+          'Играть в "ку-ку"',
+          'Показывать разные текстуры',
+          'Третья прививка',
+          'Начать подготовку к прикорму',
+        ];
+      case 6:
+        return [
+          'Ввести первый прикорм (овощи)',
+          'Поддерживать сидение',
+          'Осмотр у педиатра в 6 месяцев',
+          'Развивать речь через общение',
+          'Следить за прорезыванием зубов',
+        ];
+      case 7:
+        return [
+          'Расширять рацион прикорма',
+          'Поощрять ползание',
+          'Играть в развивающие игры',
+          'Учить пить из поилки',
+          'Плановый осмотр',
+        ];
+      case 8:
+        return [
+          'Поддерживать вставание у опоры',
+          'Добавить каши и мясо в рацион',
+          'Развивать мелкую моторику',
+          'Играть в ладушки',
+          'Продолжать общение',
+        ];
+      case 9:
+        return [
+          'Поощрять первые шаги',
+          'Расширять словарный запас',
+          'Осмотр у педиатра в 9 месяцев',
+          'Добавить рыбу в рацион',
+          'Играть в прятки',
+        ];
+      case 10:
+        return [
+          'Поддерживать ходьбу с опорой',
+          'Учить простым словам',
+          'Развивать самостоятельность',
+          'Давать пробовать новые продукты',
+          'Плановый осмотр',
+        ];
+      case 11:
+        return [
+          'Поощрять самостоятельную ходьбу',
+          'Развивать речь и понимание',
+          'Играть в сюжетные игры',
+          'Учить есть ложкой',
+          'Подготовка к первому дню рождения',
+        ];
+      case 12:
+        return [
+          'Отметить первый день рождения!',
+          'Полный осмотр у врачей',
+          'Продолжать развивать речь',
+          'Поощрять самостоятельность',
+          'Планировать развитие на второй год',
+        ];
+      default:
+        return [
+          'Ежедневное купание и массаж',
+          'Прогулки на свежем воздухе',
+          'Общение и игры с ребёнком',
+          'Наблюдение у педиатра',
+          'Регулярный режим сна и кормлений',
+        ];
+    }
+  }
 
   final Map<int, String> _monthDescriptions = {
     0: 'Малыш только родился. Главное — забота, тепло, кожа к коже, кормление по требованию.',
@@ -84,22 +209,19 @@ class _Age0to1ScreenState extends State<Age0to1Screen> {
           // --- Чек-лист ухода ---
           Text('Что важно в этом месяце', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
-          ...List.generate(_checklist.length, (i) {
-            final tasks = [
-              'Ежедневное купание и массаж',
-              'Прогулки на свежем воздухе',
-              'Общение и игры с ребёнком',
-              'Наблюдение у педиатра',
-              'Регулярный режим сна и кормлений',
-            ];
-            return CheckboxListTile(
-              value: _checklist[i],
-              onChanged: (val) => setState(() => _checklist[i] = val ?? false),
-              title: Text(tasks[i]),
-              controlAffinity: ListTileControlAffinity.leading,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            );
-          }),
+          ...() {
+            final checklist = _getChecklistForMonth(_currentMonth);
+            final tasks = _getTasksForMonth(_currentMonth);
+            return List.generate(tasks.length, (i) {
+              return CheckboxListTile(
+                value: checklist[i],
+                onChanged: (val) => setState(() => checklist[i] = val ?? false),
+                title: Text(tasks[i]),
+                controlAffinity: ListTileControlAffinity.leading,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              );
+            });
+          }(),
 
           const SizedBox(height: 16),
 
