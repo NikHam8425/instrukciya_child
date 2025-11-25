@@ -1,39 +1,21 @@
+// lib/screens/main_shell.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import 'sections_screen.dart';
-import 'assistant_screen.dart';
-import 'profile_screen.dart';
-import 'new/family_feed_screen.dart';
-import 'new/baby_calendar_screen.dart';
-import 'new/progress_screen.dart';
-
-class MainShell extends StatefulWidget {
-  const MainShell({super.key});
-
-  @override
-  State<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<MainShell> {
-  int _index = 0;
-
-  final _screens = const [
-    SectionsScreen(),
-    AssistantScreen(),
-    ProfileScreen(),
-    FamilyFeedScreen(),
-    BabyCalendarScreen(),
-    ProgressScreen(),
-  ];
+class MainShell extends StatelessWidget {
+  final Widget child;
+  const MainShell({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = _getCurrentIndex(context);
+
     return Scaffold(
-      body: _screens[_index],
+      body: child,
       bottomNavigationBar: NavigationBar(
-        // Показываем подпись только у выбранной вкладки, чтобы не было переносов
+        selectedIndex: currentIndex,
+        onDestinationSelected: (index) => _onTap(context, index),
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-        selectedIndex: _index,
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Главная'),
           NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: 'Ассистент'),
@@ -42,10 +24,31 @@ class _MainShellState extends State<MainShell> {
           NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Календарь'),
           NavigationDestination(icon: Icon(Icons.checklist_outlined), selectedIcon: Icon(Icons.checklist), label: 'Прогресс'),
         ],
-        onDestinationSelected: (i) => setState(() => _index = i),
       ),
     );
   }
+
+  int _getCurrentIndex(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    return switch (location) {
+      '/' => 0,
+      '/assistant' => 1,
+      '/profile' => 2,
+      '/feed' => 3,
+      '/calendar' => 4,
+      '/progress' => 5,
+      _ => 0,
+    };
+  }
+
+  void _onTap(BuildContext context, int index) {
+    switch (index) {
+      case 0: context.go('/'); break;
+      case 1: context.go('/assistant'); break;
+      case 2: context.go('/profile'); break;
+      case 3: context.go('/feed'); break;
+      case 4: context.go('/calendar'); break;
+      case 5: context.go('/progress'); break;
+    }
+  }
 }
-
-

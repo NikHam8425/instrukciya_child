@@ -43,3 +43,18 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Temporary files
+*.zip
+*.bak
+*.tmp
+tmp/
+_report/
+project_map.txt
+project_report.zip
+structure.txt
+app_lib.zip
+lib_small.zip
+lib.zip
+models.zip
+screens.zip
