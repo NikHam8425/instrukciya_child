@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../models/child_profile.dart';
 import '../models/user_profile.dart';
-import 'sections_screen.dart';
-import 'main_shell.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final ChildProfile? existingChild;
@@ -122,19 +121,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     if (!mounted) return;
 
-    // Переход на экран развития
-    try {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (route) => false,
-      );
-    } catch (_) {
-      // fallback, если MainShell другое имя/его нет
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (route) => false,
-      );
-    }
+    context.go('/');
   }
 
   @override

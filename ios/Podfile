@@ -1,3 +1,5 @@
+
+source 'https://github.com/CocoaPods/Specs.git'
 # Uncomment this line to define a global platform for your project
 platform :ios, '15.0'
 
@@ -32,6 +34,8 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  pod 'Firebase/Core'
+  pod 'Firebase/Auth'
   target 'RunnerTests' do
     inherit! :search_paths
   end
