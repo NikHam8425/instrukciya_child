@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/child_profile.dart';
 import '../models/user_profile.dart';
+import '../theme/theme_controller.dart';
 import 'registration_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -85,6 +86,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _chips('Аллергии', profile.allergies),
 
               const SizedBox(height: 24),
+
+              // Переключатель темы (день / ночь / как в системе)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.dark_mode),
+                  title: const Text('Тема приложения'),
+                  subtitle: Text(_themeLabel(ThemeController.instance.mode)),
+                  trailing: DropdownButton<ThemeMode>(
+                    value: ThemeController.instance.mode,
+                    underline: const SizedBox.shrink(),
+                    onChanged: (mode) {
+                      if (mode == null) return;
+                      ThemeController.instance.setMode(mode);
+                      setState(() {});
+                    },
+                    items: const [
+                      DropdownMenuItem(
+                        value: ThemeMode.system,
+                        child: Text('Как в системе'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.light,
+                        child: Text('Светлая'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.dark,
+                        child: Text('Тёмная'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               FutureBuilder<UserProfile?>(
                 future: _futureParent,
                 builder: (context, parentSnapshot) {
@@ -168,5 +202,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  String _themeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Светлая';
+      case ThemeMode.dark:
+        return 'Тёмная';
+      case ThemeMode.system:
+      default:
+        return 'Как в системе';
+    }
   }
 }

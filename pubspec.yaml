@@ -42,8 +42,8 @@ dependencies:
   image_picker: ^1.1.2
   provider: ^6.1.2
   flutter_svg: ^2.0.10+1
-  flutter_local_notifications: ^17.2.4
-  timezone: ^0.9.4
+  flutter_local_notifications: ^19.5.0
+  timezone: ^0.10.1
   rename: ^3.1.0
   # Firebase dependencies for cloud synchronization
   firebase_core: ^3.15.2
@@ -81,6 +81,7 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design:  true
+  generate: true
   assets:
     - assets/images/
     - assets/videos/

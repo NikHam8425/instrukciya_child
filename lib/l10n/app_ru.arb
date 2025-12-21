@@ -1,0 +1,18 @@
+{
+  "appTitle": "Мамин путь",
+  "@appTitle": {
+    "description": "Название приложения"
+  },
+  "loading": "Загрузка...",
+  "premium": "Premium",
+  "tips": "Советы",
+  "sectionPrenatal": "Подготовка к родам",
+  "section0to1": "0–1 год",
+  "section1to3": "1–3 года",
+  "section3to5": "3–5 лет",
+  "section6to8": "6–8 лет",
+  "section9to10": "9–10 лет",
+  "section11to13": "11–13 лет",
+  "section14to17": "14–17 лет",
+  "sectionDevelopment": "Раздел в разработке"
+}

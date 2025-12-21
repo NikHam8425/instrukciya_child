@@ -10,6 +10,9 @@ import 'package:instrukciya_child/screens/ages/age_6_8_screen.dart';
 import 'package:instrukciya_child/screens/ages/age_9_10_screen.dart';
 import 'package:instrukciya_child/screens/ages/age_11_13_screen.dart';
 import 'package:instrukciya_child/screens/ages/age_14_17_screen.dart';
+import 'package:instrukciya_child/l10n/generated/app_localizations.dart';
+import 'package:instrukciya_child/main.dart'; // For restarting or accessing main context if needed (though typically we use a provider for locale)
+
 
 // Helper function для получения информации о подписке
 Future<Map<String, dynamic>> _getSubscriptionInfo() async {
@@ -30,15 +33,16 @@ class SectionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final items = const [
-      ('prenatal', 'Подготовка к родам', '👶'),
-      ('age_0_1', '0–1 год', '🍼'),
-      ('age_1_3', '1–3 года', '🚼'),
-      ('age_3_5', '3–5 лет', '🎒'),
-      ('age_6_8', '6–8 лет', '🧠'),
-      ('age_9_10', '9–10 лет', '💡'),
-      ('age_11_13', '11–13 лет', '⚡️'),
-      ('age_14_17', '14–17 лет', '🔥'),
+    final l10n = AppLocalizations.of(context)!;
+    final items = [
+      ('prenatal', l10n.sectionPrenatal, '👶'),
+      ('age_0_1', l10n.section0to1, '🍼'),
+      ('age_1_3', l10n.section1to3, '🚼'),
+      ('age_3_5', l10n.section3to5, '🎒'),
+      ('age_6_8', l10n.section6to8, '🧠'),
+      ('age_9_10', l10n.section9to10, '💡'),
+      ('age_11_13', l10n.section11to13, '⚡️'),
+      ('age_14_17', l10n.section14to17, '🔥'),
     ];
 
     void openScreen(BuildContext context, String id) {
@@ -66,11 +70,11 @@ class SectionsScreen extends StatelessWidget {
           screen = const Age11to13Screen();
           break;
         case 'age_14_17':
-          screen = const Age14to17Screen();
+          screen = Age14to17Screen();
           break;
         default:
-          screen = const Scaffold(
-            body: Center(child: Text('Раздел в разработке')),
+          screen = Scaffold(
+            body: Center(child: Text(l10n.sectionDevelopment)),
           );
       }
       Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
@@ -78,8 +82,28 @@ class SectionsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Мамин путь'),
+        title: Text(l10n.appTitle),
         actions: [
+          // Language Switcher
+          PopupMenuButton<Locale>(
+            icon: const Icon(Icons.language),
+            onSelected: (Locale locale) {
+             // TODO: Connect to a Provider/State management to update locale globally
+             // For now we just print, but we need to implement the actual switch.
+             // Usually this requires wrapping MaterialApp with a Builder or Provider.
+             debugPrint('Switching to $locale');
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<Locale>>[
+              const PopupMenuItem<Locale>(
+                value: Locale('ru'),
+                child: Text('Русский'),
+              ),
+              const PopupMenuItem<Locale>(
+                value: Locale('en'),
+                child: Text('English'),
+              ),
+            ],
+          ),
           // Счетчик бесплатных обращений
           FutureBuilder<Map<String, dynamic>>(
             future: _getSubscriptionInfo(),
@@ -102,13 +126,13 @@ class SectionsScreen extends StatelessWidget {
                         ),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.star, size: 16, color: Colors.white),
-                          SizedBox(width: 4),
-                          Text(
-                            'Premium',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.star, size: 16, color: Colors.white),
+                            SizedBox(width: 4),
+                            Text(
+                              l10n.premium,
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -171,7 +195,7 @@ class SectionsScreen extends StatelessWidget {
                 );
               },
               icon: const Icon(Icons.recommend, size: 18),
-              label: const Text('Советы'),
+              label: Text(l10n.tips),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),

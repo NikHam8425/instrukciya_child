@@ -1,31 +1,60 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:instrukciya_child/l10n/generated/app_localizations.dart';
+
 import 'theme/app_theme.dart';
+import 'theme/theme_controller.dart';
+import 'theme/locale_controller.dart';
 import 'router/app_router.dart';
 import 'models/child_profile.dart';
+
+import 'services/notifications_service.dart';
 
 // Обработчик фоновых сообщений Firebase
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+  // Логи оставляем только для отладки, в релизе можно убрать.
+  // ignore: avoid_print
   print('Handling background message: ${message.messageId}');
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Инициализация Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
-  // Настройка Firebase Messaging
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  final messaging = FirebaseMessaging.instance;
-  await messaging.requestPermission(alert: true, badge: true, sound: true);
+  // Инициализация локальных уведомлений
+  await NotificationsService.initialize();
+
+  // Инициализация Firebase с безопасной обработкой ошибок
+  // Это предотвращает краш на Android/Web если конфиг отсутствует
+  if (!kIsWeb) {
+    try {
+      // ВАЖНО: Доступ к DefaultFirebaseOptions.currentPlatform может выбросить ошибку,
+      // если платформа не сконфигурирована. Поэтому мы делаем это внутри try-block.
+      final options = DefaultFirebaseOptions.currentPlatform;
+      await Firebase.initializeApp(options: options);
+
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      final messaging = FirebaseMessaging.instance;
+      await messaging.requestPermission(alert: true, badge: true, sound: true);
+    } catch (e, stack) {
+      debugPrint('⚠️ Firebase initialization failed: $e');
+      debugPrint('Stack trace: $stack');
+      // Приложение продолжит работу без Firebase
+    }
+  }
+
+  // Загружаем сохранённый режим темы и язык
+  try {
+    await ThemeController.instance.load();
+    await LocaleController.instance.load();
+  } catch (e) {
+    debugPrint('⚠️ Settings loading failed: $e');
+  }
 
   runApp(const InstrukciyaChildApp());
 }
@@ -66,51 +95,64 @@ class _AppInitializerState extends State<AppInitializer> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading || _router == null) {
-      return MaterialApp(
-        title: 'Мамин путь',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        home: Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 24),
-                Text(
-                  'Мамин путь',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Загрузка...',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
+    final themeController = ThemeController.instance;
+    final localeController = LocaleController.instance;
 
-    return MaterialApp.router(
-      title: 'Мамин путь',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('ru', 'RU'),
-        Locale('en', 'US'),
-      ],
-      routerConfig: _router!,
+    return AnimatedBuilder(
+      animation: themeController,
+      builder: (context, _) {
+        return AnimatedBuilder(
+          animation: localeController,
+          builder: (context, _) {
+            if (_isLoading || _router == null) {
+              return MaterialApp(
+                onGenerateTitle: (context) => AppLocalizations.of(context)?.appTitle ?? 'Мамин путь',
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.light(),
+                darkTheme: AppTheme.dark(),
+                themeMode: themeController.mode,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: Scaffold(
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 24),
+                        // Safe access to theme/context
+                        Builder(builder: (context) {
+                           return Text(
+                            AppLocalizations.of(context)?.appTitle ?? 'Мамин путь',
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 8),
+                        const Text('Загрузка...', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return MaterialApp.router(
+              onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light(),
+              darkTheme: AppTheme.dark(),
+              themeMode: themeController.mode,
+              locale: localeController.locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              routerConfig: _router!,
+            );
+          },
+        );
+      },
     );
   }
 }

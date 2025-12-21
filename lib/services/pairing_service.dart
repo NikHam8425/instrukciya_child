@@ -1,184 +1,57 @@
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:shared_preferences/shared_preferences.dart';
-// Firebase temporarily disabled
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
+/// Упрощённый локальный сервис "связки" без Firebase.
+///
+/// Весь функционал семейной ленты и приглашений теперь работает **только локально**,
+/// через `SharedPreferences` и шаринг ссылок. Это гарантирует, что приложение
+/// запускается и в web, и без настроенного Firebase.
 class PairingService {
   static const String _pairCodeKey = 'pairCode';
   static const String _partnerIdKey = 'partnerId';
   static const String _familyFeedKey = 'familyFeed';
-  
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Создание новой семьи
-  static Future<String?> createFamily(String familyName) async {
-    final user = _auth.currentUser;
-    if (user == null) return null;
-
-    try {
-      final inviteCode = _generateInviteCode();
-      final familyRef = await _firestore.collection('families').add({
-        'name': familyName,
-        'memberIds': [user.uid],
-        'creatorId': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-        'inviteCode': inviteCode,
-      });
-
-      // Обновляем профиль пользователя
-      await _firestore.collection('users').doc(user.uid).set({
-        'familyId': familyRef.id,
-        'role': 'creator',
-        'email': user.email,
-        'displayName': user.displayName ?? 'Пользователь',
-        'isPremium': false,
-        'freeActionsCount': 0,
-        'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-
-      return familyRef.id;
-    } catch (e) {
-      print('Error creating family: $e');
-      return null;
-    }
-  }
-
-  // Генерация кода приглашения
-  static String _generateInviteCode() {
-    final random = Random();
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return List.generate(8, (index) => chars[random.nextInt(chars.length)]).join();
-  }
-
-  // Генерация кода для связки (старый метод, оставлен для совместимости)
+  /// Генерация кода приглашения (локально, без сервера).
   static Future<String> generatePairCode() async {
-    final user = _auth.currentUser;
-    if (user == null) return '';
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getString(_pairCodeKey);
+    if (existing != null && existing.isNotEmpty) return existing;
 
-    try {
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final familyId = userDoc.data()?['familyId'] as String?;
-      
-      if (familyId == null) return '';
-
-      final familyDoc = await _firestore.collection('families').doc(familyId).get();
-      return familyDoc.data()?['inviteCode'] ?? '';
-    } catch (e) {
-      return '';
-    }
+    final code = _generateInviteCode();
+    await prefs.setString(_pairCodeKey, code);
+    return code;
   }
 
-  // Присоединение к семье по коду
-  static Future<bool> enterPairCode(String code) async {
-    final user = _auth.currentUser;
-    if (user == null) return false;
-
-    try {
-      // Ищем семью с таким кодом приглашения
-      final querySnapshot = await _firestore
-          .collection('families')
-          .where('inviteCode', isEqualTo: code.toUpperCase())
-          .limit(1)
-          .get();
-
-      if (querySnapshot.docs.isEmpty) return false;
-
-      final familyDoc = querySnapshot.docs.first;
-      final familyId = familyDoc.id;
-      final memberIds = List<String>.from(familyDoc.data()['memberIds'] ?? []);
-
-      // Проверяем, не состоит ли уже пользователь в этой семье
-      if (memberIds.contains(user.uid)) return true;
-
-      // Добавляем пользователя в семью
-      memberIds.add(user.uid);
-      await _firestore.collection('families').doc(familyId).update({
-        'memberIds': memberIds,
-      });
-
-      // Обновляем профиль пользователя
-      await _firestore.collection('users').doc(user.uid).set({
-        'familyId': familyId,
-        'role': 'member',
-        'email': user.email,
-        'displayName': user.displayName ?? 'Пользователь',
-        'joinedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-
-      return true;
-    } catch (e) {
-      print('Error joining family: $e');
-      return false;
-    }
-  }
-
-  // Получение текущего кода приглашения
+  /// Текущий код (создаст новый, если ещё не было).
   static Future<String?> getCurrentPairCode() async {
-    return await generatePairCode();
+    return generatePairCode();
   }
 
-  // Проверка, состоит ли пользователь в семье
+  /// "Присоединение" по коду — просто сохраняем его локально.
+  static Future<bool> enterPairCode(String code) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_partnerIdKey, code.trim());
+    return true;
+  }
+
+  /// Считаем, что связка есть, если сохранён partnerId.
   static Future<bool> isPaired() async {
-    final user = _auth.currentUser;
-    if (user == null) return false;
-
-    try {
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final familyId = userDoc.data()?['familyId'];
-      return familyId != null;
-    } catch (e) {
-      return false;
-    }
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_partnerIdKey) != null;
   }
 
-  // Получение ID семьи
-  static Future<String?> getFamilyId() async {
-    final user = _auth.currentUser;
-    if (user == null) return null;
+  /// ID семьи в локальном варианте не используется.
+  static Future<String?> getFamilyId() async => null;
 
-    try {
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      return userDoc.data()?['familyId'] as String?;
-    } catch (e) {
-      return null;
-    }
-  }
+  /// Список членов семьи — пустой локальный заглушечный список.
+  static Future<List<Map<String, dynamic>>> getFamilyMembers() async => [];
 
-  // Получение списка членов семьи
-  static Future<List<Map<String, dynamic>>> getFamilyMembers() async {
-    final familyId = await getFamilyId();
-    if (familyId == null) return [];
+  // --- Локальная "семейная лента" (остаётся как была) ---
 
-    try {
-      final familyDoc = await _firestore.collection('families').doc(familyId).get();
-      final memberIds = List<String>.from(familyDoc.data()?['memberIds'] ?? []);
-
-      final members = <Map<String, dynamic>>[];
-      for (final memberId in memberIds) {
-        final userDoc = await _firestore.collection('users').doc(memberId).get();
-        if (userDoc.exists) {
-          members.add({
-            'id': memberId,
-            'displayName': userDoc.data()?['displayName'] ?? 'Пользователь',
-            'email': userDoc.data()?['email'] ?? '',
-            'role': userDoc.data()?['role'] ?? 'member',
-          });
-        }
-      }
-
-      return members;
-    } catch (e) {
-      print('Error getting family members: $e');
-      return [];
-    }
-  }
-
-  // Сохранение записи в семейную ленту
   static Future<void> addFamilyFeedEntry({
     required String author,
     required String content,
@@ -187,29 +60,27 @@ class PairingService {
     final prefs = await SharedPreferences.getInstance();
     final existingFeed = prefs.getString(_familyFeedKey) ?? '[]';
     final List<dynamic> feed = jsonDecode(existingFeed);
-    
+
     final entry = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'author': author,
       'content': content,
       'timestamp': timestamp.toIso8601String(),
     };
-    
+
     feed.insert(0, entry); // Добавляем в начало списка
-    
+
     await prefs.setString(_familyFeedKey, jsonEncode(feed));
   }
 
-  // Получение семейной ленты
   static Future<List<Map<String, dynamic>>> getFamilyFeed() async {
     final prefs = await SharedPreferences.getInstance();
     final feedJson = prefs.getString(_familyFeedKey) ?? '[]';
     final List<dynamic> feed = jsonDecode(feedJson);
-    
+
     return feed.cast<Map<String, dynamic>>();
   }
 
-  // Очистка связки
   static Future<void> clearPairing() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_pairCodeKey);
@@ -217,7 +88,7 @@ class PairingService {
     await prefs.remove(_familyFeedKey);
   }
 
-  // Отправка приглашения через WhatsApp
+  /// Отправка приглашения через WhatsApp (локальный код).
   static Future<void> sendWhatsAppInvite() async {
     final inviteCode = await getCurrentPairCode();
     if (inviteCode == null || inviteCode.isEmpty) return;
@@ -234,7 +105,7 @@ class PairingService {
     }
   }
 
-  // Поделиться кодом приглашения
+  /// Шаринг кода через системное меню.
   static Future<void> shareInviteCode() async {
     final inviteCode = await getCurrentPairCode();
     if (inviteCode == null || inviteCode.isEmpty) return;
@@ -245,25 +116,11 @@ class PairingService {
     await Share.share(message);
   }
 
-  // Синхронизация с Firestore (автоматическая через стримы)
-  static Stream<QuerySnapshot> getFamilyEventsStream() {
-    final user = _auth.currentUser;
-    if (user == null) return const Stream.empty();
+  // --- Вспомогательное ---
 
-    return _firestore
-        .collection('users')
-        .doc(user.uid)
-        .snapshots()
-        .asyncExpand((userDoc) {
-      final familyId = userDoc.data()?['familyId'] as String?;
-      if (familyId == null) return const Stream.empty();
-
-      return _firestore
-          .collection('families')
-          .doc(familyId)
-          .collection('events')
-          .orderBy('createdAt', descending: true)
-          .snapshots();
-    });
+  static String _generateInviteCode() {
+    final random = Random();
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return List.generate(8, (index) => chars[random.nextInt(chars.length)]).join();
   }
 }

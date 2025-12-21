@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/notifications_service.dart';
+import '../../models/child_profile.dart';
 
 class BabyCalendarScreen extends StatefulWidget {
   const BabyCalendarScreen({super.key});
@@ -20,9 +21,20 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
   }
 
   Future<void> _loadBabyDob() async {
+    // 1. Пробуем взять дату рождения из профиля ребёнка
+    final profile = await ChildProfile.load();
+    if (profile != null) {
+      final dob = profile.birthDate;
+      setState(() {
+        _babyDob = dob;
+        _dateController.text = _formatDate(dob);
+      });
+      return;
+    }
+
+    // 2. Fallback: поддержка старого варианта хранения отдельного ключа
     final prefs = await SharedPreferences.getInstance();
     final dobString = prefs.getString('babyDob');
-    
     if (dobString != null) {
       final dob = DateTime.parse(dobString);
       setState(() {
@@ -51,9 +63,26 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
         _dateController.text = _formatDate(selectedDate);
       });
 
-      // Сохраняем дату
+      // Сохраняем дату (старый ключ, чтобы не ломать совместимость)
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('babyDob', selectedDate.toIso8601String());
+
+      // Обновляем дату рождения в профиле, если он уже есть
+      final profile = await ChildProfile.load();
+      if (profile != null) {
+        final updated = ChildProfile(
+          name: profile.name,
+          gender: profile.gender,
+          birthDate: selectedDate,
+          weight: profile.weight,
+          height: profile.height,
+          specialNeeds: profile.specialNeeds,
+          allergies: profile.allergies,
+          notes: profile.notes,
+          createdAt: profile.createdAt,
+        );
+        await updated.save();
+      }
 
       // Планируем уведомления
       await NotificationsService.scheduleBabyNotifications(selectedDate);

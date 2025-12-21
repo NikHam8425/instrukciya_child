@@ -1,0 +1,40 @@
+Building com.example.instrukciyaChild for simulator (ios)...
+Running Xcode build...                                          
+Xcode build done.                                           39,8s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD FAILED **
+
+
+Xcode's output:
+↳
+    Writing result bundle at path:
+    	/var/folders/37/0nnqdthx48j7yrjgpphd_hq40000gn/T/flutter_tools.xJFal9/flutter_ios_build_temp_dirwV3nLJ/temporary_xcresult_bundle
+
+    Target debug_ios_bundle_flutter_assets failed: PathNotFoundException: Cannot open file, path = '/Users/niklay/instrukciya_child/ios/Flutter/AppFrameworkInfo.plist' (OS Error: No such file or directory, errno = 2)
+    Failed to package /Users/niklay/instrukciya_child.
+    Command PhaseScriptExecution failed with a nonzero exit code
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'leveldb-library-leveldb_Privacy' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'flutter_local_notifications-flutter_local_notifications_privacy' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'abseil-xcprivacy' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'RecaptchaInterop' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'PromisesObjC-FBLPromises_Privacy' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 10.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'BoringSSL-GRPC-openssl_grpc' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'abseil' from project 'Pods')
+    warning: Run script build phase 'Create Symlinks to Header Folders' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'abseil' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 10.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'BoringSSL-GRPC' from project 'Pods')
+    warning: Run script build phase 'Create Symlinks to Header Folders' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'BoringSSL-GRPC' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 9.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'PromisesObjC' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'leveldb-library' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'gRPC-Core-grpc' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'gRPC-Core' from project 'Pods')
+    warning: Run script build phase 'Create Symlinks to Header Folders' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'gRPC-Core' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'gRPC-C++-gRPCCertificates-Cpp' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'gRPC-C++-grpcpp' from project 'Pods')
+    /Users/niklay/instrukciya_child/ios/Pods/Pods.xcodeproj: warning: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 11.0, but the range of supported deployment target versions is 12.0 to 26.1.99. (in target 'gRPC-C++' from project 'Pods')
+    warning: Run script build phase 'Create Symlinks to Header Folders' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'gRPC-C++' from project 'Pods')
+    note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+
+Encountered error while building for simulator.
