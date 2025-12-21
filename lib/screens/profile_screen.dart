@@ -4,6 +4,8 @@ import '../models/user_profile.dart';
 import '../theme/theme_controller.dart';
 import 'registration_screen.dart';
 
+import '../theme/locale_controller.dart'; // Added import
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -65,7 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 120), // Increased bottom padding to clear Nav Bar
             children: [
               _tile('Имя', profile.name, Icons.person),
               _tile('Пол',
@@ -119,6 +121,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
+              // Переключатель языка
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.language),
+                  title: const Text('Язык'),
+                  subtitle: Text(
+                      LocaleController.instance.locale?.languageCode == 'en'
+                          ? 'English'
+                          : 'Русский'),
+                  trailing: DropdownButton<String>(
+                    value: LocaleController.instance.locale?.languageCode ?? 'ru',
+                    underline: const SizedBox.shrink(),
+                    onChanged: (code) {
+                      if (code == null) return;
+                      LocaleController.instance.setLocale(Locale(code));
+                      setState(() {});
+                    },
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'ru',
+                        child: Text('Русский'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'en',
+                        child: Text('English'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               FutureBuilder<UserProfile?>(
                 future: _futureParent,
                 builder: (context, parentSnapshot) {
@@ -127,6 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(height: 24), // Added spacing
                       const Text(
                         'Данные родителя',
                         style: TextStyle(

@@ -85,25 +85,7 @@ class SectionsScreen extends StatelessWidget {
         title: Text(l10n.appTitle),
         actions: [
           // Language Switcher
-          PopupMenuButton<Locale>(
-            icon: const Icon(Icons.language),
-            onSelected: (Locale locale) {
-             // TODO: Connect to a Provider/State management to update locale globally
-             // For now we just print, but we need to implement the actual switch.
-             // Usually this requires wrapping MaterialApp with a Builder or Provider.
-             debugPrint('Switching to $locale');
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<Locale>>[
-              const PopupMenuItem<Locale>(
-                value: Locale('ru'),
-                child: Text('Русский'),
-              ),
-              const PopupMenuItem<Locale>(
-                value: Locale('en'),
-                child: Text('English'),
-              ),
-            ],
-          ),
+          // Language Switcher removed (moved to Profile)
           // Счетчик бесплатных обращений
           FutureBuilder<Map<String, dynamic>>(
             future: _getSubscriptionInfo(),

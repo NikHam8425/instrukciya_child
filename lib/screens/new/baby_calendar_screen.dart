@@ -244,15 +244,19 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Access theme
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Календарь малыша'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
+        // Remove hardcoded backgroundColor/foregroundColor to inherit from Theme
+        // backgroundColor: Colors.white, 
+        // elevation: 0,
+        // foregroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120), // Add bottom padding for Nav Bar
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -261,9 +265,12 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                // Use theme colors
+                color: isDark ? theme.cardColor : Colors.blue[50], 
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue[200]!),
+                border: Border.all(
+                  color: isDark ?  Colors.white10 : Colors.blue[200]!
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,7 +333,7 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
                         'Укажите дату рождения, чтобы увидеть события',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey,
+                          color: theme.hintColor,
                         ),
                       ),
                     ),
@@ -344,17 +351,22 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isPassed ? Colors.grey[100] : Colors.white,
+                          // Use card color for active items, darker for passed
+                          color: isPassed 
+                              ? (isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100])
+                              : theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isPassed ? Colors.grey[300]! : Colors.blue[200]!,
+                            color: isPassed 
+                                ? (isDark ? Colors.white10 : Colors.grey[300]!)
+                                : (isDark ? theme.primaryColor.withOpacity(0.3) : Colors.blue[200]!),
                           ),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               isPassed ? Icons.check_circle : Icons.schedule,
-                              color: isPassed ? Colors.grey : Colors.blue,
+                              color: isPassed ? theme.disabledColor : theme.primaryColor,
                               size: 24,
                             ),
                             const SizedBox(width: 12),
@@ -367,7 +379,8 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: isPassed ? Colors.grey : Colors.black,
+                                      // Inherit color from theme (handles dark mode auto)
+                                      color: isPassed ? theme.disabledColor : null, 
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -375,7 +388,7 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
                                     milestone['description'],
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: isPassed ? Colors.grey : Colors.grey[600],
+                                      color: isPassed ? theme.disabledColor : theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -385,7 +398,7 @@ class _BabyCalendarScreenState extends State<BabyCalendarScreen> {
                                         : 'Через $daysUntil дн',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: isPassed ? Colors.grey : Colors.blue,
+                                      color: isPassed ? theme.disabledColor : theme.primaryColor,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
