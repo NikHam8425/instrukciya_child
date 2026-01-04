@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../models/child_profile.dart';
 import '../models/user_profile.dart';
+import '../services/payment_service.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final ChildProfile? existingChild;
@@ -56,6 +57,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _parentNameController = TextEditingController();
   final _parentEmailController = TextEditingController();
   final _parentPhoneController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingChild != null) {
+      final c = widget.existingChild!;
+      _nameController.text = c.name;
+      _weightController.text = c.weight > 0 ? c.weight.toString() : '';
+      _heightController.text = c.height > 0 ? c.height.toString() : '';
+      _notesController.text = c.notes;
+      _selectedGender = c.gender;
+      _selectedBirthDate = c.birthDate;
+      _selectedAllergies.addAll(c.allergies);
+      _selectedSpecialNeeds.addAll(c.specialNeeds);
+    }
+    
+    if (widget.existingParent != null) {
+      final p = widget.existingParent!;
+      _parentNameController.text = p.name;
+      _parentEmailController.text = p.email ?? '';
+      _parentPhoneController.text = p.phone ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -118,6 +142,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           : _parentPhoneController.text.trim(),
     );
     await parent.save();
+    
+    // Если это новая регистрация, сбрасываем счетчик бесплатных действий
+    if (widget.existingChild == null) {
+      await PaymentService().resetFreeActions();
+    }
 
     if (!mounted) return;
 

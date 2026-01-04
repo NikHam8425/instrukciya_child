@@ -63,7 +63,7 @@ class AppTheme {
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: 11, // Reduced to prevent wrapping
+            fontSize: 10, // Further reduced to prevent wrapping
             color: scheme.onSurfaceVariant,
           ),
         ),

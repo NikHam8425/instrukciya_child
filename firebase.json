@@ -1,1 +1,62 @@
-{"firestore":{"database":"(default)","location":"nam5","rules":"firestore.rules","indexes":"firestore.indexes.json"},"functions":[{"source":"functions","codebase":"default","disallowLegacyRuntimeConfig":true,"ignore":["node_modules",".git","firebase-debug.log","firebase-debug.*.log","*.local"]}],"hosting":{"public":"public","ignore":["firebase.json","**/.*","**/node_modules/**"]},"flutter":{"platforms":{"ios":{"default":{"projectId":"mompath-app","appId":"1:28620112463:ios:4b65ed0cf597d87bdbe03a","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"mompath-app","configurations":{"ios":"1:28620112463:ios:4b65ed0cf597d87bdbe03a"}}}}}}
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "source": "functions"
+    },
+    {
+      "source": "functions-yookassa",
+      "codebase": "functions",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ],
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  },
+  "flutter": {
+    "platforms": {
+      "ios": {
+        "default": {
+          "projectId": "mompath-app",
+          "appId": "1:28620112463:ios:4b65ed0cf597d87bdbe03a",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "mompath-app",
+          "configurations": {
+            "ios": "1:28620112463:ios:4b65ed0cf597d87bdbe03a"
+          }
+        }
+      }
+    }
+  }
+}

@@ -3,6 +3,8 @@ import '../models/child_profile.dart';
 import '../services/openai_service.dart';
 import '../services/payment_service.dart';
 
+import 'paywall_screen.dart';
+
 class AssistantScreen extends StatefulWidget {
   const AssistantScreen({super.key});
 
@@ -95,8 +97,17 @@ class _AssistantScreenState extends State<AssistantScreen> {
           ElevatedButton.icon(
             onPressed: () async {
               Navigator.pop(context);
-              final success = await _paymentService.buyPro();
-              if (success && mounted) {
+              
+              // Переход на экран оплаты
+              final success = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(builder: (_) => const PaywallScreen()),
+              );
+              
+              if ((success == true) && mounted) {
+                // Обновляем UI (счетчик/статус)
+                setState(() {});
+                
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('✨ Premium подписка активирована!'),

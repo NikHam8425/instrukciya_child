@@ -196,7 +196,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () => Navigator.pushNamed(context, '/registration'),
+                onPressed: () async {
+                  final child = await _future;
+                  final parent = await _futureParent;
+                  if (!context.mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RegistrationScreen(
+                        existingChild: child,
+                        existingParent: parent,
+                      ),
+                    ),
+                  );
+                },
                 child: const Text('Редактировать'),
               ),
             ],

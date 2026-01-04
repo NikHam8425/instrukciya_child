@@ -22,5 +22,10 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.familyId ==
         get(/databases/$(database)/documents/users/$(userId)).data.familyId;
     }
+
+    match /payments/{paymentId} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow write: if false; // Только сервер может писать (через Cloud Functions)
+    }
   }
 }

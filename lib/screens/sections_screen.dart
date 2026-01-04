@@ -191,10 +191,10 @@ class SectionsScreen extends StatelessWidget {
           final it = items[i];
           return ListTile(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            tileColor: Colors.white,
+            tileColor: theme.cardColor,
             leading: Text(it.$3, style: theme.textTheme.headlineSmall),
-            title: Text(it.$2, style: const TextStyle(fontWeight: FontWeight.w700)),
-            trailing: const Icon(Icons.chevron_right),
+            title: Text(it.$2, style: TextStyle(fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface)),
+            trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
             onTap: () => openScreen(context, it.$1),
           );
         },

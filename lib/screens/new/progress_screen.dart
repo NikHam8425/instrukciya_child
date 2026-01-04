@@ -19,48 +19,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
     'Кормление грудью',
     'Кормление из бутылочки',
     'Укладывание спать',
-    'Проверка температуры',
-    'Массаж для малыша',
-    'Прогулка на свежем воздухе',
-    'Игры с погремушками',
-    'Чтение сказок',
-    'Пение колыбельных',
-    'Проверка веса',
-    'Измерение роста',
-    'Проверка слуха',
-    'Проверка зрения',
-    'Вакцинация по календарю',
-    'Посещение педиатра',
-    'Консультация невролога',
-    'Консультация окулиста',
-    'Консультация ЛОРа',
-    'Введение прикорма',
-    'Приучение к горшку',
-    'Развитие мелкой моторики',
-    'Развитие речи',
-    'Обучение ползанию',
-    'Обучение сидению',
-    'Обучение стоянию',
-    'Обучение ходьбе',
-    'Развитие социальных навыков',
-    'Обучение самостоятельности',
-    'Создание режима дня',
-    'Организация детской комнаты',
-    'Безопасность в доме',
-    'Первая помощь при травмах',
-    'Обработка пупочной ранки',
-    'Уход за кожей',
-    'Профилактика опрелостей',
-    'Обработка ногтей',
-    'Чистка носика',
-    'Уход за ушками',
-    'Уход за глазками',
-    'Подготовка к детскому саду',
-    'Развитие творческих способностей',
-    'Физическое развитие',
-    'Эмоциональное развитие',
-    'Интеллектуальное развитие',
-    'Социальная адаптация',
   ];
 
   @override
@@ -251,10 +209,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Прогресс малыша'),
-        backgroundColor: Colors.white,
-        elevation: 1,
-        foregroundColor: Colors.black87,
+        title: const Text('Прогресс'),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
@@ -274,7 +229,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.green[50],
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : Colors.green[50],
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -351,7 +308,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
@@ -370,7 +327,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             decoration: isChecked ? TextDecoration.lineThrough : null,
-                            color: isChecked ? Colors.grey[500] : Colors.black87,
+                            color: isChecked 
+                                ? Theme.of(context).colorScheme.onSurfaceVariant
+                                : Theme.of(context).colorScheme.onSurface,
                             fontWeight: isChecked ? FontWeight.w400 : FontWeight.w500,
                           ),
                         ),

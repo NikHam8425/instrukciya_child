@@ -1,7 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'yookassa_service.dart';
 
 class PaymentService {
   static const int FREE_ACTIONS_LIMIT = 5;
+  final _yooKassa = YooKassaService();
 
   /// Проверяет, есть ли у пользователя премиум подписка
   Future<bool> isPremium() async {
@@ -26,6 +28,9 @@ class PaymentService {
   Future<bool> canPerformAction() async {
     if (await isPremium()) return true;
     
+    // Синхронизируем статус с сервером на случай, если подписка была куплена
+    if (await syncSubscriptionStatus()) return true;
+    
     final count = await getFreeActionsCount();
     return count < FREE_ACTIONS_LIMIT;
   }
@@ -36,6 +41,8 @@ class PaymentService {
 
     final count = await getFreeActionsCount();
     if (count >= FREE_ACTIONS_LIMIT) {
+      // Последний шанс - проверить на сервере (вдруг оплатил, но кеш старый)
+      if (await syncSubscriptionStatus()) return true;
       return false; // Нужна подписка
     }
 
@@ -43,21 +50,33 @@ class PaymentService {
     return true;
   }
 
-  /// Покупка премиум подписки (локальный режим)
-  Future<bool> buyPro() async {
+  /// Обновляет локальный статус премиума (вызывается после успешной оплаты)
+  Future<bool> setPremiumStatus(bool isActive) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isPremium', true);
+      await prefs.setBool('isPremium', isActive);
       return true;
     } catch (e) {
-      print('Error buying premium: $e');
+      print('Error setting premium status: $e');
+      return false;
+    }
+  }
+
+  /// Проверяет статус на сервере и обновляет локальный кеш
+  Future<bool> syncSubscriptionStatus() async {
+    try {
+      final isActive = await _yooKassa.checkSubscriptionStatus();
+      await setPremiumStatus(isActive);
+      return isActive;
+    } catch (e) {
+      print('Sync subscription error: $e');
       return false;
     }
   }
 
   /// Восстанавливает покупки (проверяет статус в Firestore)
   Future<bool> restorePurchases() async {
-    return await isPremium();
+    return await syncSubscriptionStatus();
   }
 
   /// Получает оставшиеся бесплатные действия
@@ -65,4 +84,12 @@ class PaymentService {
     final count = await getFreeActionsCount();
     return FREE_ACTIONS_LIMIT - count;
   }
+
+  /// Сбрасывает счетчик бесплатных действий (для сброса данных)
+  Future<void> resetFreeActions() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('freeActionsCount');
+    await prefs.remove('isPremium');
+  }
 }
+

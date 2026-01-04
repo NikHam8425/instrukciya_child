@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -18,8 +19,6 @@ import 'services/notifications_service.dart';
 // Обработчик фоновых сообщений Firebase
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  // Логи оставляем только для отладки, в релизе можно убрать.
-  // ignore: avoid_print
   print('Handling background message: ${message.messageId}');
 }
 
@@ -27,7 +26,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Инициализация локальных уведомлений
-  await NotificationsService.initialize();
+  try {
+    await NotificationsService.initialize();
+  } catch (e) {
+    debugPrint('⚠️ NotificationsService initialization failed: $e');
+  }
 
   // Инициализация Firebase с безопасной обработкой ошибок
   // Это предотвращает краш на Android/Web если конфиг отсутствует
@@ -37,6 +40,11 @@ void main() async {
       // если платформа не сконфигурирована. Поэтому мы делаем это внутри try-block.
       final options = DefaultFirebaseOptions.currentPlatform;
       await Firebase.initializeApp(options: options);
+
+      // ВАЖНО: Авторизуемся анонимно, чтобы работали Cloud Functions
+      // Функции требуют авторизации (request.auth.uid)
+      await FirebaseAuth.instance.signInAnonymously();
+      debugPrint('Signed in as: ${FirebaseAuth.instance.currentUser?.uid}');
 
       FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
       final messaging = FirebaseMessaging.instance;
@@ -86,7 +94,15 @@ class _AppInitializerState extends State<AppInitializer> {
   }
 
   Future<void> _prepareRouter() async {
-    final hasProfile = await ChildProfile.hasProfile();
+    bool hasProfile = false;
+    try {
+      hasProfile = await ChildProfile.hasProfile();
+    } catch (e) {
+      debugPrint('Error checking profile: $e');
+    }
+    
+    if (!mounted) return;
+    
     setState(() {
       _router = createRouter(hasProfile: hasProfile);
       _isLoading = false;
